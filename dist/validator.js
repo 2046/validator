@@ -15,6 +15,8 @@ define(function(require, exports, module){
         element : null,
         specialProps : ['element'],
         init : function(){
+            var ctx = this;
+    
             this.items = [];
     
             if(this.element.is('form')){
@@ -27,6 +29,7 @@ define(function(require, exports, module){
                 if(this.get('checkOnSubmit')){
                     this.element.on('submit.validator', function(e){
                         e.preventDefault();
+                        ctx.execute();
                     });
                 }
             }
@@ -62,6 +65,13 @@ define(function(require, exports, module){
                 erase(target, this.items);
                 target.destroy();
             }
+    
+            return this;
+        },
+        execute : function(){
+            $.each(this.items, function(i, item){
+                item.execute();
+            });
     
             return this;
         },

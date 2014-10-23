@@ -14,6 +14,8 @@ Validator = Base.extend({
     element : null,
     specialProps : ['element'],
     init : function(){
+        var ctx = this;
+
         this.items = [];
 
         if(this.element.is('form')){
@@ -26,6 +28,7 @@ Validator = Base.extend({
             if(this.get('checkOnSubmit')){
                 this.element.on('submit.validator', function(e){
                     e.preventDefault();
+                    ctx.execute();
                 });
             }
         }
@@ -61,6 +64,13 @@ Validator = Base.extend({
             erase(target, this.items);
             target.destroy();
         }
+
+        return this;
+    },
+    execute : function(){
+        $.each(this.items, function(i, item){
+            item.execute();
+        });
 
         return this;
     },
