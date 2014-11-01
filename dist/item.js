@@ -10,55 +10,50 @@ define(function(require, exports, module){
         attrs : {
             name : '',
             rule : null,
-            element : '',
-            required : false
+            element : ''
         },
-        execute : function(){
-            var rules = parseRules(this.get('rule'));
+        init : function(){
+            var ctx, rules, element;
+    
+            ctx = this;
+            this.tasks = [];
+            element = this.get('element');
+            rules = parseRules(this.get('rule'));
     
             if(rules){
-                if(!this.get('required')){
-                    var truly = false;
-                    var t = this.get('element').attr('type');
-    
-                    switch(t){
-                        case 'checkbox' :
-                        case 'radio' :
-                            var checkd = false;
-                            this.get('element').each(function(i, item){
-                                if(!(item).prop(checkd)){
-                                    checkd = true;
-                                    return false;
-                                }
-                            });
-                            truly = checkd;
-                            break;
-                        default :
-                            truly = !!this.get('element').val();
-                    }
-                }
-    
                 if(!$.isArray(rules)){
                     throw new Error('No validation rule specified or not specified as an array.');
                 }
     
-                $.each(rules, function(i, item){
-                    var obj = parseRule(item);
-                    var ruleName = obj.name;
-                    var param = obj.parma;
+                $.each(rules, function(index, rule){
+                    var ruleOperator;
     
-                    var ruleOperator = Rule.getRule(ruleName);
+                    rule = parseRule(rule);
+                    ruleOperator = Rule.getOperator(rule.name);
     
                     if(!ruleOperator){
-                        throw new Error('Validation rule with name "' + ruleName + '" cannot be found.');
+                        throw new Error('Validation rule with name "' + rule.name + '" cannot be found.');
                     }
     
-                    return ruleOperator($.extend({}, parma, {
-                        element : this.get('element'),
-                        rule : ruleName
-                    }));
+                    ctx.tasks.push({
+                        ruleOperator : ruleOperator,
+                        param : $.extend({}, rule.param, {
+                            element : element
+                        })
+                    });
                 });
             }
+        },
+        execute : function(){
+            var pass = true;
+    
+            $.each(this.tasks, function(index, task){
+                if(!(pass = task.ruleOperator(task.param))){
+                    return false;
+                }
+            });
+    
+            return pass;
         }
     });
     
@@ -89,8 +84,7 @@ define(function(require, exports, module){
         NOTICE = 'Invalid option object "' + str + '".';
     
         result = {};
-        str = str.slice(1, -1);
-        arr = str.split(',');
+        arr = str.slice(1, -1).split(',');
     
         for(index = arr.length - 1; index >= 0; index--){
             arr[index] = $.trim(arr[index]);
@@ -114,10 +108,8 @@ define(function(require, exports, module){
     };
     
     function getValue(str){
-        if(str.charAt(0) == '"' &&
-            str.charAt(str.length - 1) == '"' ||
-            str.charAt(0) == "'" &&
-            str.charAt(str.length - 1) == "'"){
+        if(str.charAt(0) == '"' && str.charAt(str.length - 1) == '"' ||
+            str.charAt(0) == "'" && str.charAt(str.length - 1) == "'"){
             return eval(str);
         }
     

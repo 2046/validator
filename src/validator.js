@@ -51,13 +51,12 @@ Validator = Base.extend({
 
         if(typeof selector === 'string'){
             for(index = this.items.length - 1; index >=0; index--){
-                if(name === this.items[index].get('name')){
-                    target = this.items[index];
+
+                target = this.items[index];
+                if(selector === target.get('name')){
                     break;
                 }
             }
-        }else if(selector instanceof Item){
-            target = selector;
         }
 
         if(target){
@@ -78,7 +77,7 @@ Validator = Base.extend({
         return this.element.find(selector);
     },
     destroy : function(){
-        var index;
+        var index = this.items.length - 1;
 
         if(this.element.is('form')){
             try{
@@ -92,7 +91,7 @@ Validator = Base.extend({
             this.element.off('submit.validator');
         }
 
-        for(index = this.items.length - 1; index >= 0; index--){
+        for(;index >= 0; index--){
             this.removeItem(this.items[index]);
         }
 
@@ -111,14 +110,6 @@ function erase(target, array){
         }
     }
 };
-
-new Validator({
-    element : $('#form')
-}).addItem({
-    name : 'username',
-    required : true,
-    rule : 'email minlength{min:1}'
-});
 
 Validator.getRule = Rule.getRule;
 Validator.addRule = Rule.addRule;

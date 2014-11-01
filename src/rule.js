@@ -2,18 +2,61 @@
 
 var rules = {};
 
-function addRule(name, operator){
+function Rule(name, operator){
     if(operator instanceof RegExp){
-        rules[name] = function(options){
-            return operator.test($(options.element).val());
+        this.operator = function(options){
+            return operator.test(options.element.val());
         };
     }else if(isFunction(operator)){
-        rules[name] = function(options){
+        this.operator = function(options){
             return operator.call(this, options);
         };
     }else{
         throw new Error('The second argument must be a regexp or a function.');
     }
+};
+
+Rule.prototype.and = function(name){
+    var rule, operator;
+
+    if(!(rule = getRule(name))){
+        throw new Error('No rule with name "' + name + '" found.');
+    }
+
+    operator = this.operator;
+    this.operator = function(options){
+        return operator.call(this, options) && rule.operator.call(this, options);
+    };
+};
+
+Rule.prototype.or = function(name){
+    var rule, operator;
+
+    if(!(rule = getRule(name))){
+        throw new Error('No rule with name "' + name + '" found.');
+    }
+
+    operator = this.operator;
+    this.operator = function(options){
+        return operator.call(this, options) || rule.operator.call(this, options);
+    };
+};
+
+Rule.prototype.not = function(){
+    var rule = rule = getRule(name);
+
+    if(!rule){
+        throw new Error('No rule with name "' + name + '" found.');
+    }
+
+    operator = this.operator;
+    this.operator = function(options){
+        return !operator.call(this, options);
+    };
+};
+
+function addRule(name, operator){
+    rules[name] = new Rule(name, operator);
 };
 
 function getRule(name){
@@ -31,41 +74,51 @@ addRule('date', /^\d{4}\-[01]?\d\-[0-3]?\d$|^[01]\d\/[0-3]\d\/\d{4}$|^\d{4}年[0
 addRule('number', /^[+-]?[1-9][0-9]*(\.[0-9]+)?([eE][+-][1-9][0-9]*)?$|^[+-]?0?\.[0-9]+([eE][+-][1-9][0-9]*)?$|^0$/);
 
 addRule('required', function(options){
-    var element = $(options.element);
+    var element, checked;
+
+    element = options.element;
 
     switch(element.attr('type')){
         case 'checkbox' :
         case 'radio' :
-            var checked = false;
+            checked = false;
             element.each(function(i, item){
                 if($(item).prop('checked')){
                     checked = true;
                     return false;
                 }
             });
+
             return checked;
         default :
             return Boolean($.trim(element.val()));
     }
 });
+
 addRule('min', function(options){
     return Number(options.element.val()) >= Number(options.min);
 });
+
 addRule('max', function(options){
     return Number(options.element.val()) <= Number(options.max);
 });
+
 addRule('minlength', function(options){
     return options.element.val().length >= Number(options.min);
 });
+
 addRule('maxlength', function(options){
     return options.element.val().length <= Number(options.max);
 });
 
-module.exports = {
-    getRule : getRule,
-    addRule : addRule
-};
-
 function isFunction(val){
     return Object.prototype.toString.call(val) === '[object Function]';
+};
+
+module.exports = {
+    getRule : getRule,
+    addRule : addRule,
+    getOperator : function(name){
+        return rules[name].operator;
+    }
 };
