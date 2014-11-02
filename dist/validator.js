@@ -10,7 +10,11 @@ define(function(require, exports, module){
     
     Validator = Base.extend({
         attrs : {
-            checkOnSubmit : true
+            checkOnSubmit : true,
+            showMessage : noop,
+            hideMessage : noop,
+            onFormValidate : noop,
+            onFormValidated : noop
         },
         element : null,
         specialProps : ['element'],
@@ -37,7 +41,11 @@ define(function(require, exports, module){
             validators.push(this);
         },
         addItem : function(options){
-            options.element = this.$('[name=' + options.name + ']');
+            options = $.extend({
+                hideMessage : this.get('hideMessage'),
+                showMessage : this.get('showMessage'),
+                element : this.$('[name=' + options.name + ']')
+            }, options);
     
             if(!options.element.length){
                 throw new Error('element does not exist');
@@ -58,6 +66,8 @@ define(function(require, exports, module){
                         break;
                     }
                 }
+            }else if(selector instanceof Item){
+                target = selector;
             }
     
             if(target){
@@ -68,9 +78,17 @@ define(function(require, exports, module){
             return this;
         },
         execute : function(){
+            var pass = true;
+    
+            this.trigger('formValidate', this.element);
+    
             $.each(this.items, function(i, item){
-                item.execute();
+                if(!(pass = item.execute())){
+                    return false;
+                }
             });
+    
+            this.trigger('formValidated', pass, this.element);
     
             return this;
         },
@@ -111,6 +129,8 @@ define(function(require, exports, module){
             }
         }
     };
+    
+    function noop(){};
     
     Validator.getRule = Rule.getRule;
     Validator.addRule = Rule.addRule;

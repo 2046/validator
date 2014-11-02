@@ -4,9 +4,21 @@ define(function(require, exports, module){
     var Validator = require('validator');
 
     new Validator({
-        element : $('#form')
+        element : $('#form'),
+        onFormValidated : function(pass, element){
+            console.log(pass, element);
+        }
     }).addItem({
         name : 'username',
-        rule : 'required email minlength{min:1}'
+        rule : 'required email',
+        showMessage : function(element, ruleName){
+            console.log(element, ruleName);
+        },
+        hideMessage : function(element, ruleName){
+            console.log(element, ruleName);
+        }
+    }).addItem({
+        name : 'username2',
+        rule : 'required email'
     });
 });

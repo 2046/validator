@@ -10,7 +10,9 @@ define(function(require, exports, module){
         attrs : {
             name : '',
             rule : null,
-            element : ''
+            element : '',
+            showMessage : noop,
+            hideMessage : noop
         },
         init : function(){
             var ctx, rules, element;
@@ -36,6 +38,7 @@ define(function(require, exports, module){
                     }
     
                     ctx.tasks.push({
+                        name : rule.name,
                         ruleOperator : ruleOperator,
                         param : $.extend({}, rule.param, {
                             element : element
@@ -45,15 +48,27 @@ define(function(require, exports, module){
             }
         },
         execute : function(){
-            var pass = true;
+            var pass, ruleName, element;
+    
+            pass = true;
+            element = this.get('element');
+    
+            this.get('hideMessage')(element, ruleName);
     
             $.each(this.tasks, function(index, task){
                 if(!(pass = task.ruleOperator(task.param))){
+                    ruleName = task.name;
                     return false;
                 }
             });
     
+            this.get(pass ? 'hideMessage' : 'showMessage')(element, ruleName);
+    
             return pass;
+        },
+        destroy : function(){
+            this.get('hideMessage')(this.get('element'), null);
+            Item.superclass.destroy.call(this);
         }
     });
     
@@ -115,6 +130,8 @@ define(function(require, exports, module){
     
         return str;
     };
+    
+    function noop(){};
     
     module.exports = Item;
 });
