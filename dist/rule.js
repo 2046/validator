@@ -1,60 +1,64 @@
 define(function(require, exports, module){
     'use strict'
     
-    var rules = {};
+    var rules, Base, Rule;
     
-    function Rule(name, operator){
-        if(operator instanceof RegExp){
-            this.operator = function(options){
-                return operator.test(options.element.val());
+    rules = {};
+    Base = require('base');
+    
+    Rule = Base.extend({
+        initialize : function(name, operator){
+            Rule.superclass.initialize.call(this);
+    
+            if(operator instanceof RegExp){
+                this.operator = function(options){
+                    return operator.test(options.element.val());
+                };
+            }else if(isFunction(operator)){
+                this.operator = function(options){
+                    return operator.call(this, options);
+                };
+            }else{
+                throw new Error('The second argument must be a regexp or a function.');
+            }
+        },
+        and : function(name){
+            var rule, operator;
+    
+            if(!(rule = getRule(name))){
+                throw new Error('No rule with name "' + name + '" found.');
+            }
+    
+            operator = this.operator;
+            return function(options){
+                return operator.call(this, options) && rule.operator.call(this, options);
             };
-        }else if(isFunction(operator)){
-            this.operator = function(options){
-                return operator.call(this, options);
+        },
+        or : function(name){
+            var rule, operator;
+    
+            if(!(rule = getRule(name))){
+                throw new Error('No rule with name "' + name + '" found.');
+            }
+    
+            operator = this.operator;
+            return function(options){
+                return operator.call(this, options) || rule.operator.call(this, options);
             };
-        }else{
-            throw new Error('The second argument must be a regexp or a function.');
+        },
+        not : function(){
+            var rule = rule = getRule(name);
+    
+            if(!rule){
+                throw new Error('No rule with name "' + name + '" found.');
+            }
+    
+            operator = this.operator;
+            return function(options){
+                return !operator.call(this, options);
+            };
         }
-    };
-    
-    Rule.prototype.and = function(name){
-        var rule, operator;
-    
-        if(!(rule = getRule(name))){
-            throw new Error('No rule with name "' + name + '" found.');
-        }
-    
-        operator = this.operator;
-        this.operator = function(options){
-            return operator.call(this, options) && rule.operator.call(this, options);
-        };
-    };
-    
-    Rule.prototype.or = function(name){
-        var rule, operator;
-    
-        if(!(rule = getRule(name))){
-            throw new Error('No rule with name "' + name + '" found.');
-        }
-    
-        operator = this.operator;
-        this.operator = function(options){
-            return operator.call(this, options) || rule.operator.call(this, options);
-        };
-    };
-    
-    Rule.prototype.not = function(){
-        var rule = rule = getRule(name);
-    
-        if(!rule){
-            throw new Error('No rule with name "' + name + '" found.');
-        }
-    
-        operator = this.operator;
-        this.operator = function(options){
-            return !operator.call(this, options);
-        };
-    };
+    });
     
     function addRule(name, operator){
         rules[name] = new Rule(name, operator);

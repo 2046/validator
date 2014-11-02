@@ -3,6 +3,8 @@ define(function(require, exports, module){
 
     var Validator = require('validator');
 
+    Validator.addRule('account', Validator.getRule('email').or('mobile'))
+
     new Validator({
         element : $('#form'),
         onFormValidated : function(pass, element){
@@ -10,7 +12,7 @@ define(function(require, exports, module){
         }
     }).addItem({
         name : 'username',
-        rule : 'required email',
+        rule : 'required email minlength{min:8} maxlength{max:16}',
         showMessage : function(element, ruleName){
             console.log(element, ruleName);
         },
