@@ -46,13 +46,7 @@ Rule = Base.extend({
         };
     },
     not : function(){
-        var rule = rule = getRule(name);
-
-        if(!rule){
-            throw new Error('No rule with name "' + name + '" found.');
-        }
-
-        operator = this.operator;
+        var operator = this.operator;
         return function(options){
             return !operator.call(this, options);
         };

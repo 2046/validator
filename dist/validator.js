@@ -10,11 +10,11 @@ define(function(require, exports, module){
     
     Validator = Base.extend({
         attrs : {
-            checkOnSubmit : true,
             showMessage : noop,
             hideMessage : noop,
             onFormValidate : noop,
-            onFormValidated : noop
+            onFormValidated : noop,
+            triggerType : 'submit'
         },
         element : null,
         specialProps : ['element'],
@@ -30,18 +30,17 @@ define(function(require, exports, module){
                     this.element.attr('novalidate', 'novalidate');
                 }catch(e){}
     
-                if(this.get('checkOnSubmit')){
-                    this.element.on('submit.validator', function(e){
-                        e.preventDefault();
-                        ctx.execute();
-                    });
-                }
+                this.element.on('submit.validator', function(e){
+                    e.preventDefault();
+                    ctx.execute();
+                });
             }
     
             validators.push(this);
         },
         addItem : function(options){
             options = $.extend({
+                triggerType : this.get('triggerType'),
                 hideMessage : this.get('hideMessage'),
                 showMessage : this.get('showMessage'),
                 element : this.$('[name=' + options.name + ']')
@@ -59,13 +58,7 @@ define(function(require, exports, module){
             var index, target;
     
             if(typeof selector === 'string'){
-                for(index = this.items.length - 1; index >=0; index--){
-    
-                    target = this.items[index];
-                    if(selector === target.get('name')){
-                        break;
-                    }
-                }
+                target = findItem(this, selector);
             }else if(selector instanceof Item){
                 target = selector;
             }
@@ -128,6 +121,22 @@ define(function(require, exports, module){
                 return array;
             }
         }
+    };
+    
+    function findItem(ctx, name){
+        var index, target, items;
+    
+        items = ctx.items;
+        index = items.length - 1;
+    
+        for(; index >= 0; index--){
+            target = items[index];
+            if(name === target.get('name')){
+                break;
+            }
+        }
+    
+        return target;
     };
     
     function noop(){};

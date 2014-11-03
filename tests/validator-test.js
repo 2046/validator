@@ -3,7 +3,7 @@ define(function(require, exports, module){
 
     var Validator = require('validator');
 
-    Validator.addRule('account', Validator.getRule('email').or('mobile'))
+    Validator.addRule('account', Validator.getRule('email').not())
 
     new Validator({
         element : $('#form'),

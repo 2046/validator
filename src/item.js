@@ -8,10 +8,11 @@ Rule = require('./rule');
 Item = Base.extend({
     attrs : {
         name : '',
-        rule : null,
+        rule : '',
         element : '',
         showMessage : noop,
-        hideMessage : noop
+        hideMessage : noop,
+        triggerType : 'submit'
     },
     init : function(){
         var ctx, rules, element;
@@ -45,6 +46,18 @@ Item = Base.extend({
                 });
             });
         }
+
+        this.behavior();
+    },
+    behavior : function(){
+        var ctx = this;
+
+        if(this.get('triggerType') === 'blur'){
+            this.get('element').parent('form').on('blur.validator', '[name=' + this.get('name') + ']', function(e){
+                e.preventDefault();
+                ctx.execute();
+            });
+        }
     },
     execute : function(){
         var pass, ruleName, element;
@@ -67,6 +80,11 @@ Item = Base.extend({
     },
     destroy : function(){
         this.get('hideMessage')(this.get('element'), null);
+
+        if(this.get('triggerType') === 'blur'){
+            this.get('element').parent('form').off('blur.validator', '[name=' + this.get('name') + ']');
+        }
+
         Item.superclass.destroy.call(this);
     }
 });

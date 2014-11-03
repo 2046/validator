@@ -9,10 +9,11 @@ define(function(require, exports, module){
     Item = Base.extend({
         attrs : {
             name : '',
-            rule : null,
+            rule : '',
             element : '',
             showMessage : noop,
-            hideMessage : noop
+            hideMessage : noop,
+            triggerType : 'submit'
         },
         init : function(){
             var ctx, rules, element;
@@ -46,6 +47,18 @@ define(function(require, exports, module){
                     });
                 });
             }
+    
+            this.behavior();
+        },
+        behavior : function(){
+            var ctx = this;
+    
+            if(this.get('triggerType') === 'blur'){
+                this.get('element').parent('form').on('blur.validator', '[name=' + this.get('name') + ']', function(e){
+                    e.preventDefault();
+                    ctx.execute();
+                });
+            }
         },
         execute : function(){
             var pass, ruleName, element;
@@ -68,6 +81,11 @@ define(function(require, exports, module){
         },
         destroy : function(){
             this.get('hideMessage')(this.get('element'), null);
+    
+            if(this.get('triggerType') === 'blur'){
+                this.get('element').parent('form').off('blur.validator', '[name=' + this.get('name') + ']');
+            }
+    
             Item.superclass.destroy.call(this);
         }
     });
