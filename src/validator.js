@@ -21,6 +21,7 @@ Validator = Base.extend({
         var ctx = this;
 
         this.items = [];
+        this.element = $(this.element);
 
         if(this.element.is('form')){
             this._novalidate_old = this.element.attr('novalidate');

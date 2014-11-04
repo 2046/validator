@@ -65,11 +65,10 @@ Item = Base.extend({
         pass = true;
         element = this.get('element');
 
-        this.get('hideMessage')(element, ruleName);
-
         $.each(this.tasks, function(index, task){
+            ruleName = task.name;
+
             if(!(pass = task.ruleOperator(task.param))){
-                ruleName = task.name;
                 return false;
             }
         });
