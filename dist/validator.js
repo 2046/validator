@@ -76,8 +76,8 @@ define(function(require, exports, module){
     
             this.trigger('formValidate', this.element);
             $.each(this.items, function(i, item) {
-				item.get('hideMessage')(item.get('element'), null);
-			});
+		item.get('hideMessage')(item.get('element'), null);
+	    });
     
             $.each(this.items, function(i, item){
                 if(!(pass = item.execute())){
