@@ -12,6 +12,7 @@ Item = Base.extend({
         element : '',
         showMessage : noop,
         hideMessage : noop,
+        skipHidden : false,
         triggerType : 'submit'
     },
     init : function(){
@@ -72,6 +73,10 @@ Item = Base.extend({
                 return false;
             }
         });
+        
+        if(this.get('skipHidden') && !element.is(':visible')){
+            pass = true;
+        }
 
         this.get(pass ? 'hideMessage' : 'showMessage')(element, ruleName);
 
