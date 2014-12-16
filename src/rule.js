@@ -109,6 +109,10 @@ addRule('maxlength', function(options){
     return options.element.val().length <= Number(options.max);
 });
 
+addRule('confirmation', function(options) {
+    return options.element.val() == $(options.element.parent('form').find('[name="' + options.target + '"]')).val();
+});
+
 function isFunction(val){
     return Object.prototype.toString.call(val) === '[object Function]';
 };
