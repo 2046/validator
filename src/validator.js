@@ -9,6 +9,7 @@ Item = require('./item');
 
 Validator = Base.extend({
     attrs : {
+        skipHidden : false,
         showMessage : noop,
         hideMessage : noop,
         onFormValidate : noop,
@@ -40,6 +41,7 @@ Validator = Base.extend({
     },
     addItem : function(options){
         options = $.extend({
+            skipHidden : this.get('skipHidden'),
             triggerType : this.get('triggerType'),
             hideMessage : this.get('hideMessage'),
             showMessage : this.get('showMessage'),
