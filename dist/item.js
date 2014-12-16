@@ -13,6 +13,7 @@ define(function(require, exports, module){
             element : '',
             showMessage : noop,
             hideMessage : noop,
+            skipHidden : false,
             triggerType : 'submit'
         },
         init : function(){
@@ -73,6 +74,10 @@ define(function(require, exports, module){
                     return false;
                 }
             });
+            
+            if(this.get('skipHidden') && !element.is(':visible')){
+                pass = true;
+            }
     
             this.get(pass ? 'hideMessage' : 'showMessage')(element, ruleName);
     
