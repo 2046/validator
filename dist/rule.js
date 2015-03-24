@@ -111,7 +111,7 @@ define(function(require, exports, module){
     });
     
     addRule('confirmation', function(options) {
-	return options.element.val() == $(options.element.parent('form').find('[name="' + options.target + '"]')).val();
+	return options.element.val() == $(options.element.parents('form').find('[name="' + options.target + '"]')).val();
     });
     
     function isFunction(val){
